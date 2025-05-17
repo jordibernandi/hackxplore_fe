@@ -10,11 +10,11 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex justify-between items-center">
         <div className="flex items-center">
           {/* Logo */}
-          <div className="w-32 sm:w-40 h-8 sm:h-10 bg-primary flex items-center justify-center text-white font-bold text-sm sm:text-base">
-            Würth Elektronik
+          <div className="w-16 h-16 bg-primary flex items-center justify-center">
+            <img src="/we-logo.jpeg" alt="Würth Elektronik Logo" className="h-full" />
           </div>
         </div>
-        
+
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-4 lg:space-x-8">
           <a href="#" className="text-accent hover:text-primary font-semibold text-sm lg:text-base">Products</a>
@@ -22,12 +22,12 @@ const Header: React.FC = () => {
           <a href="#" className="text-accent hover:text-primary font-semibold text-sm lg:text-base">Services</a>
           <a href="#" className="text-accent hover:text-primary font-semibold text-sm lg:text-base">Support</a>
         </nav>
-        
+
         <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden focus:outline-none" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden focus:outline-none"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -37,7 +37,7 @@ const Header: React.FC = () => {
           </Button>
         </div>
       </div>
-      
+
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute w-full bg-white border-t border-gray-200 shadow-lg z-10">

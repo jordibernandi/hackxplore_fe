@@ -1,5 +1,5 @@
 {
-  "name": "Würth Elektronik Component Finder",
+  "name": "Würth Elektronik Matching Algorithm",
   "short_name": "Component Finder",
   "description": "Find matching components and alternatives for your electronic projects",
   "start_url": "/",
@@ -8,13 +8,8 @@
   "theme_color": "#E2001A",
   "icons": [
     {
-      "src": "https://cdn.pixabay.com/photo/2016/10/19/22/22/electronic-1754901_640.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn.pixabay.com/photo/2016/10/19/22/22/electronic-1754901_640.png",
-      "sizes": "512x512",
+      "src": "./we-logo.jpeg",
+      "sizes": "200x200",
       "type": "image/png"
     }
   ]
