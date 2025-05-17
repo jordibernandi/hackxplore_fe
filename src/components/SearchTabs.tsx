@@ -8,12 +8,12 @@ interface SearchTabsProps {
 
 const SearchTabs: React.FC<SearchTabsProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="border-b border-gray-200 overflow-x-auto overfflow-y-hidden">
-      <nav className="flex -mb-px min-w-max">
+    <div className="border-b border-gray-200 overflow-x-auto">
+      <nav className="flex min-w-max">
         <button
           onClick={() => setActiveTab('excel')}
           className={cn(
-            "mr-4 md:mr-8 py-3 md:py-4 px-1 text-xs md:text-sm font-medium whitespace-nowrap",
+            "mb-[1px] mr-4 md:mr-8 py-3 md:py-4 px-1 text-xs md:text-sm font-medium whitespace-nowrap",
             activeTab === 'excel' ? 'tab-active' : 'text-gray-500 hover:text-gray-700'
           )}
         >
@@ -22,7 +22,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({ activeTab, setActiveTab }) => {
         <button
           onClick={() => setActiveTab('manual')}
           className={cn(
-            "mr-4 md:mr-8 py-3 md:py-4 px-1 text-xs md:text-sm font-medium whitespace-nowrap",
+            "mb-[1px] mr-4 md:mr-8 py-3 md:py-4 px-1 text-xs md:text-sm font-medium whitespace-nowrap",
             activeTab === 'manual' ? 'tab-active' : 'text-gray-500 hover:text-gray-700'
           )}
         >
@@ -31,7 +31,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({ activeTab, setActiveTab }) => {
         <button
           onClick={() => setActiveTab('camera')}
           className={cn(
-            "py-3 md:py-4 px-1 text-xs md:text-sm font-medium whitespace-nowrap",
+            "mb-[1px] py-3 md:py-4 px-1 text-xs md:text-sm font-medium whitespace-nowrap",
             activeTab === 'camera' ? 'tab-active' : 'text-gray-500 hover:text-gray-700'
           )}
         >
