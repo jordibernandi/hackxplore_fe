@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+// import { apiRequest } from '@/lib/queryClient';
 import { ComponentResult, SearchQuery, EmailData, ExcelRowData } from '@/lib/types';
 import { exportAsCSV, exportAsJSON } from '@/lib/utils';
 
@@ -151,8 +151,8 @@ const Home: React.FC = () => {
 
   // Result handlers
   const handleToggleSelect = (id: string, selected: boolean) => {
-    setResults(prev => 
-      prev.map(item => 
+    setResults(prev =>
+      prev.map(item =>
         item.id === id ? { ...item, selected } : item
       )
     );
@@ -172,7 +172,7 @@ const Home: React.FC = () => {
 
   const handleEmailResults = () => {
     const selectedComponents = results.filter(item => item.selected);
-    
+
     if (selectedComponents.length === 0) {
       toast({
         title: "No components selected",
@@ -181,7 +181,7 @@ const Home: React.FC = () => {
       });
       return;
     }
-    
+
     setIsEmailModalOpen(true);
   };
 
@@ -192,33 +192,33 @@ const Home: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      
+
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-gray-200">
-            <h1 className="text-xl sm:text-2xl font-bold text-accent">Component Finder</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-accent">Matching Algorithms</h1>
             <p className="text-sm sm:text-base text-gray-600 mt-2">Find matching components and alternatives for your projects</p>
           </div>
 
           {/* Search Section */}
           <div className="p-4 sm:p-6">
             <SearchTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-            
+
             {activeTab === 'excel' && (
               <ExcelUpload onSearch={handleExcelSearch} />
             )}
-            
+
             {activeTab === 'manual' && (
               <ManualInput onSearch={handleManualSearch} />
             )}
-            
+
             {activeTab === 'camera' && (
               <CameraCapture onSearch={handleCameraSearch} />
             )}
           </div>
 
           {/* Results Section */}
-          <ResultsSection 
+          <ResultsSection
             results={results}
             loading={searchMutation.isPending}
             onExportCSV={handleExportCSV}
@@ -229,7 +229,7 @@ const Home: React.FC = () => {
           />
 
           {/* Email Modal */}
-          <EmailModal 
+          <EmailModal
             isOpen={isEmailModalOpen}
             onClose={() => setIsEmailModalOpen(false)}
             selectedComponents={results.filter(item => item.selected)}
@@ -237,7 +237,7 @@ const Home: React.FC = () => {
           />
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

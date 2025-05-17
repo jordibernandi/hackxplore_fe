@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Search, 
-  X, 
-  FileText, 
-  Upload, 
+import {
+  Search,
+  X,
+  FileText,
+  Upload,
   Loader2,
-  Check
+  // Check
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -49,13 +49,13 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
   const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const newFiles = Array.from(e.dataTransfer.files).filter(
-        file => file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
-               file.type === 'text/csv'
+        file => file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+          file.type === 'text/csv'
       );
-      
+
       if (newFiles.length > 0) {
         setUploadedFiles(prev => [...prev, ...newFiles]);
         // Reset upload states when new files are dropped
@@ -67,12 +67,12 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
 
   const handleUpload = () => {
     if (uploadedFiles.length === 0) return;
-    
+
     setIsUploading(true);
-    
+
     // Simulate API call to /api/upload-bom
     console.log('Uploading files to /api/upload-bom:', uploadedFiles);
-    
+
     // Simulate API response with mock data after a delay
     setTimeout(() => {
       // Generate mock Excel data rows
@@ -87,7 +87,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
           selected: false
         });
       }
-      
+
       setUploadedData(mockData);
       setIsUploading(false);
       setUploadComplete(true);
@@ -95,14 +95,14 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
   };
 
   const handleToggleSelect = (id: string, selected: boolean) => {
-    setUploadedData(prev => 
-      prev.map(item => 
+    setUploadedData(prev =>
+      prev.map(item =>
         item.id === id ? { ...item, selected } : item
       )
     );
-    
+
     // Update selectAll state based on whether all items are now selected
-    const allSelected = uploadedData.every(item => 
+    const allSelected = uploadedData.every(item =>
       item.id === id ? selected : item.selected
     );
     setSelectAll(allSelected);
@@ -126,8 +126,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
         {!uploadComplete && (
           <>
             <div className="flex items-center justify-center w-full">
-              <label 
-                htmlFor="file-upload" 
+              <label
+                htmlFor="file-upload"
                 className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
@@ -135,20 +135,20 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <FileText className="w-12 h-12 text-gray-400 mb-3" />
                   <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                  <p className="text-xs text-gray-500">Excel (.xlsx) or CSV (.csv) files</p>
+                  <p className="text-xs text-gray-500">Excel or CSV files</p>
                 </div>
-                <input 
-                  id="file-upload" 
+                <input
+                  id="file-upload"
                   ref={fileInputRef}
-                  type="file" 
-                  className="hidden" 
-                  accept=".xlsx,.csv" 
-                  multiple 
+                  type="file"
+                  className="hidden"
+                  accept=".xlsx,.xls,.csv"
+                  multiple
                   onChange={handleFileChange}
                 />
               </label>
             </div>
-            
+
             {uploadedFiles.length > 0 && (
               <div className="mt-6">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Uploaded Files</h3>
@@ -160,7 +160,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
                         <span className="ml-2 truncate">{file.name}</span>
                       </div>
                       <div className="ml-4 flex-shrink-0">
-                        <button 
+                        <button
                           onClick={() => handleRemoveFile(index)}
                           className="text-primary hover:text-red-700"
                         >
@@ -172,9 +172,9 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
                 </ul>
               </div>
             )}
-            
+
             <div className="mt-6 flex justify-center">
-              <Button 
+              <Button
                 onClick={handleUpload}
                 disabled={uploadedFiles.length === 0 || isUploading}
                 className="bg-primary hover:bg-red-700"
@@ -194,21 +194,21 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
             </div>
           </>
         )}
-        
+
         {uploadComplete && uploadedData.length > 0 && (
           <div className="mt-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-700">Excel Data Preview</h3>
               <p className="text-sm text-gray-500 mt-1 md:mt-0">Please select the components you want to search</p>
             </div>
-            
+
             <div className="overflow-x-auto border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[50px]">
-                      <Checkbox 
-                        checked={selectAll} 
+                      <Checkbox
+                        checked={selectAll}
                         onCheckedChange={handleToggleSelectAll}
                       />
                     </TableHead>
@@ -222,8 +222,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
                   {uploadedData.map(row => (
                     <TableRow key={row.id}>
                       <TableCell>
-                        <Checkbox 
-                          checked={row.selected} 
+                        <Checkbox
+                          checked={row.selected}
                           onCheckedChange={(checked) => handleToggleSelect(row.id, checked === true)}
                         />
                       </TableCell>
@@ -236,10 +236,10 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
                 </TableBody>
               </Table>
             </div>
-            
+
             <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setUploadComplete(false);
                   setUploadedData([]);
@@ -247,8 +247,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
               >
                 Upload Different Files
               </Button>
-              
-              <Button 
+
+              <Button
                 onClick={handleSearch}
                 disabled={!uploadedData.some(item => item.selected)}
                 className="bg-primary hover:bg-red-700"

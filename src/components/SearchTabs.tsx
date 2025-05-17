@@ -8,7 +8,7 @@ interface SearchTabsProps {
 
 const SearchTabs: React.FC<SearchTabsProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="border-b border-gray-200 overflow-x-auto">
+    <div className="border-b border-gray-200 overflow-x-auto overfflow-y-hidden">
       <nav className="flex -mb-px min-w-max">
         <button
           onClick={() => setActiveTab('excel')}
