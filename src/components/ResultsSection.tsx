@@ -206,9 +206,9 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
 
                 <div className="mt-3 pt-3 sm:mt-4 sm:pt-4 border-t border-gray-200">
                   <h4 className="text-xs sm:text-sm font-medium text-gray-700">Alternative Product:</h4>
-                  <p className="mt-1 text-xs sm:text-sm font-mono text-primary">{item.wuerth_manufacturer_part_number}</p>
+                  <p className="mt-1 text-xs sm:text-sm font-mono text-primary">{item.wuerth_manufacturer_part_number.length > 0 ? item.wuerth_manufacturer_part_number : "No matched!"}</p>
                   <h4 className="text-xs sm:text-sm font-medium text-gray-700">Reason:</h4>
-                  <p className="mt-1 text-xs ont-mono text-black">{item.reason_why_it_is_a_match}</p>
+                  <p className="mt-1 text-xs ont-mono text-black">{item.wuerth_manufacturer_part_number.length > 0 ? item.reason_why_it_is_a_match : "-"}</p>
                 </div>
 
                 <div className="mt-3 sm:mt-4 flex justify-end space-x-2">
