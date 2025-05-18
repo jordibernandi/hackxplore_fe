@@ -201,7 +201,7 @@ const Home: React.FC = () => {
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-gray-200">
             <h1 className="text-xl sm:text-2xl font-bold text-accent">Matching Algorithms</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2">Find matching components and alternatives for your projects</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Find matching components and alternatives for your projects - Upload your BOM files here!</p>
           </div>
 
           {/* Search Section */}
