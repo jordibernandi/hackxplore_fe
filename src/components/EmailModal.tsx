@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -12,12 +12,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail } from 'lucide-react';
-import { ComponentResult, EmailData } from '@/lib/types';
+import { ResultRowData, EmailData } from '@/lib/types';
 
 interface EmailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedComponents: ComponentResult[];
+  selectedComponents: ResultRowData[];
   onSendEmail: (data: EmailData) => void;
 }
 
@@ -61,7 +61,7 @@ const EmailModal: React.FC<EmailModalProps> = ({
             Send the selected component information to your customer.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="mt-4 space-y-4">
           <div>
             <Label htmlFor="email-recipient">Recipient Email</Label>
@@ -74,7 +74,7 @@ const EmailModal: React.FC<EmailModalProps> = ({
               required
             />
           </div>
-          
+
           <div>
             <Label htmlFor="email-subject">Subject</Label>
             <Input
@@ -85,7 +85,7 @@ const EmailModal: React.FC<EmailModalProps> = ({
               className="mt-1"
             />
           </div>
-          
+
           <div>
             <Label htmlFor="email-message">Message</Label>
             <Textarea
@@ -98,10 +98,10 @@ const EmailModal: React.FC<EmailModalProps> = ({
             />
           </div>
         </div>
-        
+
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button 
+          <Button
             className="bg-primary hover:bg-red-700"
             disabled={!recipient.trim()}
             onClick={handleSendEmail}

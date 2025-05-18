@@ -1,22 +1,30 @@
 // Data types for the application
 
-export interface ComponentResult {
+export type ComponentType = 'Capacitor' | 'Inductor' | 'Resistor';
+
+export interface OriginalData {
+  manufacturer: string;
+  manufacturer_part_number: string;
+  component_type: string;
+  key_electrical_specs: Record<string, string>;
+}
+
+
+export interface ExcelRowData extends OriginalData {
   id: string;
-  productNumber: string;
-  competitor: string;
-  category: string;
-  alternative: string;
+  selected: boolean;
+}
+
+export interface ResultOriginalData extends OriginalData {
+  wuerth_manufacturer_part_number: string;
+  reason_why_it_is_a_match: string;
+}
+
+export interface ResultRowData extends ResultOriginalData {
+  id: string;
   selected?: boolean;
 }
 
-export interface ExcelRowData {
-  id: string;
-  partNumber: string;
-  description: string;
-  quantity: number;
-  manufacturer: string;
-  selected: boolean;
-}
 
 export type SearchMethod = 'excel' | 'manual' | 'camera';
 
@@ -26,12 +34,12 @@ export interface SearchQuery {
   includeAlternatives?: boolean;
   files?: File[];
   imageData?: string;
-  selectedItems?: ExcelRowData[]; // For excel upload selected items
+  selectedItems?: OriginalData[]; // For excel upload selected items
 }
 
 export interface EmailData {
   recipient: string;
   subject: string;
   message: string;
-  selectedComponents: ComponentResult[];
+  selectedComponents: ResultRowData[];
 }

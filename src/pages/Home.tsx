@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
-// import { apiRequest } from '@/lib/queryClient';
-import { ComponentResult, SearchQuery, EmailData, ExcelRowData } from '@/lib/types';
+import { apiRequest } from '@/lib/queryClient';
+import { ResultRowData, SearchQuery, EmailData, OriginalData, ResultOriginalData } from '@/lib/types';
 import { exportAsCSV, exportAsJSON } from '@/lib/utils';
 
 import Header from '@/components/Header';
@@ -15,79 +15,83 @@ import ResultsSection from '@/components/ResultsSection';
 import EmailModal from '@/components/EmailModal';
 
 // Mock component data for demo
-const mockResults: ComponentResult[] = [
+const mockResults: ResultRowData[] = [
   {
-    id: '1',
-    productNumber: '744771147',
-    competitor: 'Murata',
-    category: 'Inductors',
-    alternative: 'WE-LQS 744032'
-  },
-  {
-    id: '2',
-    productNumber: '744773356',
-    competitor: 'TDK',
-    category: 'Capacitors',
-    alternative: 'WE-XHMI 74438356'
-  },
-  {
-    id: '3',
-    productNumber: '744727825',
-    competitor: 'Vishay',
-    category: 'Resistors',
-    alternative: 'WE-MAPI 74437368'
-  },
-  {
-    id: '4',
-    productNumber: '744725168',
-    competitor: 'Kemet',
-    category: 'Capacitors',
-    alternative: 'WE-CBAT 74437283'
-  },
-  {
-    id: '5',
-    productNumber: '744779243',
-    competitor: 'TDK',
-    category: 'Inductors',
-    alternative: 'WE-PD 744778012'
+    "id": "1",
+    "selected": false,
+    "manufacturer": "Panasonic Electronic Components",
+    "manufacturer_part_number": "ERJ-3EKF5901V",
+    "wuerth_manufacturer_part_number": "WEK3EKF5901V",
+    "reason_why_it_is_a_match": "It is the crrect fit",
+    "component_type": "Resistor",
+    "key_electrical_specs": {
+      "Resistance": "5.9 kΩ",
+      "Power_Rating": "0.1W (1/10W)",
+      "Case_Code": "0603 (1608 Metric)",
+      "Length": "1.60 mm",
+      "Width": "0.80 mm",
+      "Height": "0.55 mm",
+      "Tolerance": "±1%",
+      "Temperature_Coefficient": "±100 ppm/°C",
+      "Minimum_Operating_Temperature": "-55°C",
+      "Maximum_Operating_Temperature": "155°C"
+    }
   }
 ];
 
 const Home: React.FC = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('excel');
-  const [results, setResults] = useState<ComponentResult[]>([]);
+  const [results, setResults] = useState<ResultRowData[]>([]);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   // Search mutation
   const searchMutation = useMutation({
-    mutationFn: (searchData: SearchQuery) => {
-      // For demo purposes, we'll just wait and return mock data
-      // In a real app, this would call the API
+    mutationFn: async (searchData: SearchQuery) => {
       console.log('Searching with:', searchData);
-      return new Promise<ComponentResult[]>(resolve => {
-        // Generate more results for Excel search
-        if (searchData.method === 'excel' && searchData.selectedItems) {
-          const moreResults = [...mockResults];
-          // Add more mock results based on the selected items
-          searchData.selectedItems.forEach((item, index) => {
-            if (index < 3) return; // Skip first few to avoid duplicates with mockResults
-            moreResults.push({
-              id: `generated-${item.id}`,
-              productNumber: item.partNumber,
-              competitor: item.manufacturer,
-              category: ['Inductors', 'Capacitors', 'Resistors', 'Connectors', 'Diodes'][Math.floor(Math.random() * 5)],
-              alternative: `WE-${Math.floor(Math.random() * 1000000)}`
-            });
-          });
-          setTimeout(() => resolve(moreResults), 1500);
-        } else {
-          setTimeout(() => resolve(mockResults), 1500);
-        }
-      });
+
+      if (searchData.method === 'excel' && searchData.selectedItems) {
+        // Call the specific API endpoint for Excel search
+        const response = await apiRequest(
+          'POST',
+          'http://172.203.218.183:8080/api/recommend_candidates',
+          searchData.selectedItems
+        );
+        return response.json();
+      }
+      else if (searchData.method === 'manual') {
+        // const response = await apiRequest(
+        //   'POST',
+        //   '/api/components/match-manual',
+        //   {
+        //     productNumber: searchData.productNumber,
+        //     includeAlternatives: searchData.includeAlternatives
+        //   }
+        // );
+        // return response.json();
+        return mockResults;
+      }
+      else if (searchData.method === 'camera') {
+        // const response = await apiRequest(
+        //   'POST',
+        //   '/api/components/match-image',
+        //   {
+        //     imageData: searchData.imageData
+        //   }
+        // );
+        // return response.json();
+        return mockResults;
+      }
+
+      throw new Error('Invalid search method');
     },
     onSuccess: (data) => {
-      setResults(data.map(item => ({ ...item, selected: false })));
+      console.log('Search results:', data);
+      setResults(data.map((item: ResultOriginalData) => ({
+        ...item,
+        id: Math.random().toString(36).substring(2, 15), // Generate a random string for ID
+        selected: false
+      })));
       toast({
         title: "Search completed",
         description: `Found ${data.length} matching components`,
@@ -127,7 +131,7 @@ const Home: React.FC = () => {
   });
 
   // Search handlers
-  const handleExcelSearch = (selectedItems: ExcelRowData[]) => {
+  const handleExcelSearch = (selectedItems: OriginalData[]) => {
     searchMutation.mutate({
       method: 'excel',
       selectedItems
@@ -202,7 +206,7 @@ const Home: React.FC = () => {
 
           {/* Search Section */}
           <div className="p-4 sm:p-6">
-            <SearchTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <SearchTabs activeTab={activeTab} setActiveTab={setActiveTab} setResults={setResults} />
 
             {activeTab === 'excel' && (
               <ExcelUpload onSearch={handleExcelSearch} />

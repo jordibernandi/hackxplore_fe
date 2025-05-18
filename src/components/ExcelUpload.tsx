@@ -1,22 +1,32 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import {
   Search,
   X,
   FileText,
   Upload,
   Loader2,
+  Eye,
   // Check
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Checkbox } from '@/components/ui/checkbox';
-import { ExcelRowData } from '@/lib/types';
+import { ExcelRowData, OriginalData } from '@/lib/types';
+import { getCategoryClass, isComponentType } from '@/lib/utils';
 
 interface ExcelUploadProps {
-  onSearch: (selectedItems: ExcelRowData[]) => void;
+  onSearch: (selectedItems: OriginalData[]) => void;
 }
 
 const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
+  const { toast } = useToast();
+
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -65,61 +75,6 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
     }
   };
 
-  // const handleUpload = () => {
-  //   if (uploadedFiles.length === 0) return;
-
-  //   setIsUploading(true);
-
-  //   // Simulate API call to /api/upload-bom
-  //   console.log('Uploading files to /api/upload-bom:', uploadedFiles);
-
-  //   // Simulate API response with mock data after a delay
-  //   setTimeout(() => {
-  //     // Generate mock Excel data rows
-  //     const mockData: ExcelRowData[] = [];
-  //     for (let i = 0; i < 15; i++) {
-  //       mockData.push({
-  //         id: `row-${i}`,
-  //         partNumber: `P${Math.floor(Math.random() * 1000000)}`,
-  //         description: `Electronic Component ${i}`,
-  //         quantity: Math.floor(Math.random() * 100) + 1,
-  //         manufacturer: ['Murata', 'TDK', 'Vishay', 'Kemet'][Math.floor(Math.random() * 4)],
-  //         selected: false
-  //       });
-  //     }
-
-  //     setUploadedData(mockData);
-  //     setIsUploading(false);
-  //     setUploadComplete(true);
-  //   }, 1500);
-  // };
-
-  const handleTest = async () => {
-    try {
-      const response = await fetch('http://172.203.218.183:8080/email_ingestion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json', // Crucial header
-        },
-        body: JSON.stringify({
-          fromDate: "10/31/2024"
-        }),
-      });
-      console.log("response: ", response)
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Upload failed:', errorData);
-        // Handle error (e.g., display an error message to the user)
-        return;
-      }
-
-      const responseData = await response.json();
-      console.log('Upload successful:', responseData);
-    } catch (error) {
-      console.error('Error during upload:', error);
-    }
-  }
-
   const handleUpload = async () => {
     if (uploadedFiles.length === 0) return;
 
@@ -131,8 +86,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
     });
 
     try {
-      console.log(formData)
-      const response = await fetch('http://127.0.0.1:5000/api/upload-bom', {
+      const response = await fetch('http://172.203.218.183:8080/api/upload-bom', {
         method: 'POST',
         body: formData,
       });
@@ -142,19 +96,36 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
         console.error('Upload failed:', errorData);
         // Handle error (e.g., display an error message to the user)
         setIsUploading(false);
+        toast({
+          title: "Upload failed",
+          description: "There was an error processing your request.",
+          variant: "destructive"
+        });
         return;
       }
 
       const responseData = await response.json();
-      console.log('Upload successful:', responseData);
-      setUploadedData(responseData.data); // Assuming your Flask response has a 'data' field
+      const processedDataWithRandomId: ExcelRowData[] = responseData.map((data: OriginalData) => ({
+        ...data,
+        id: Math.random().toString(36).substring(2, 15), // Generate a random string for ID
+        selected: false,
+      }));
+      setUploadedData(processedDataWithRandomId);
       setIsUploading(false);
       setUploadComplete(true);
-
+      toast({
+        title: "Upload completed",
+        description: `Found ${processedDataWithRandomId.length} components`,
+      });
     } catch (error) {
       console.error('Error during upload:', error);
       setIsUploading(false);
       // Handle network error
+      toast({
+        title: "Upload failed",
+        description: "There was an error processing your request.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -180,7 +151,10 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
   const handleSearch = () => {
     const selectedItems = uploadedData.filter(item => item.selected);
     if (selectedItems.length > 0) {
-      onSearch(selectedItems);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const removeIdAndSelected = selectedItems.map(({ id, selected, ...rest }) => rest);
+      console.log("Selected items: ", removeIdAndSelected);
+      onSearch(removeIdAndSelected);
     }
   };
 
@@ -238,12 +212,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
             )}
 
             <div className="mt-6 flex justify-center">
-              <Button
-                onClick={handleTest}
-                className="bg-primary hover:bg-red-700"
-              >
-                TEST BUTTON
-              </Button>
+
               <Button
                 onClick={handleUpload}
                 disabled={uploadedFiles.length === 0 || isUploading}
@@ -283,25 +252,55 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
                       />
                     </TableHead>
                     <TableHead>Part Number</TableHead>
-                    <TableHead className="hidden md:table-cell">Description</TableHead>
-                    <TableHead>Qty</TableHead>
                     <TableHead>Manufacturer</TableHead>
+                    <TableHead className="text-center">Type</TableHead>
+                    <TableHead className="text-center">Info</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {uploadedData.map(row => (
-                    <TableRow key={row.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={row.selected}
-                          onCheckedChange={(checked) => handleToggleSelect(row.id, checked === true)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">{row.partNumber}</TableCell>
-                      <TableCell className="hidden md:table-cell">{row.description}</TableCell>
-                      <TableCell>{row.quantity}</TableCell>
-                      <TableCell>{row.manufacturer}</TableCell>
-                    </TableRow>
+                    isComponentType(row.component_type) ? (
+                      <TableRow key={row.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={row.selected}
+                            onCheckedChange={(checked) => handleToggleSelect(row.id, checked === true)}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">{row.manufacturer_part_number}</TableCell>
+                        <TableCell>{row.manufacturer}</TableCell>
+                        <TableCell className="text-center">
+                          <span className={`card-category-badge text-xs ${getCategoryClass(row.component_type)}`}>
+                            {row.component_type}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <div className="flex justify-center"> {/* Center the icon */}
+                                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-red-700" />
+                              </div>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="min-w-96 p-4 rounded-md shadow-md border border-gray-200 bg-white"> {/* Improved styling */}
+                              <div className="grid grid-cols-1 gap-2"> {/* Use a grid for better layout */}
+                                {row.key_electrical_specs && Object.entries(row.key_electrical_specs).map(([key, value]) => {
+                                  const newKey = key.replace(/_/g, " ");
+                                  return (
+                                    <div key={key} className="space-y-1 text-left flex gap-2 items-center">
+                                      <p className="text-sm font-semibold text-gray-700 text-nowrap">{newKey}:</p>
+                                      <p className="text-sm text-gray-600">{value}</p>
+                                    </div>
+                                  )
+                                })}
+                                {!row.key_electrical_specs && (
+                                  <p className="text-sm text-gray-500">No electrical specifications available.</p>
+                                )}
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </TableCell>
+                      </TableRow>
+                    ) : null // Return null if the condition is false
                   ))}
                 </TableBody>
               </Table>

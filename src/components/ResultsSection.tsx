@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Download, Code, Mail, Eye, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ComponentResult } from '@/lib/types';
+import { Loader2, Download, Code, Mail, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ResultRowData } from '@/lib/types';
 import { getCategoryClass, formatPaginationText } from '@/lib/utils';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface ResultsSectionProps {
-  results: ComponentResult[];
+  results: ResultRowData[];
   loading: boolean;
   onExportCSV: () => void;
   onExportJSON: () => void;
@@ -110,48 +115,65 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
               <TableRow>
                 <TableHead className="w-[50px] sm:w-[100px]">
                   <div className="flex items-center">
-                    <Checkbox 
-                      id="select-all" 
+                    <Checkbox
+                      id="select-all"
                       checked={selectAll}
                       onCheckedChange={handleSelectAll}
                     />
                     <span className="ml-2 sm:ml-3 text-xs sm:text-sm hidden sm:inline">Select</span>
                   </div>
                 </TableHead>
-                <TableHead className="text-xs sm:text-sm">Product Number</TableHead>
-                <TableHead className="text-xs sm:text-sm">Competitor</TableHead>
-                <TableHead className="text-xs sm:text-sm">Category</TableHead>
-                <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Alternative</TableHead>
-                <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                <TableHead>Part Number</TableHead>
+                <TableHead>Manufacturer</TableHead>
+                <TableHead className="text-center">Type</TableHead>
+                <TableHead className="text-center">Info</TableHead>
+                <TableHead>Alternative</TableHead>
+                <TableHead>Reason</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {currentItems.map((item) => (
                 <TableRow key={item.id} className="hover:bg-gray-50">
                   <TableCell>
-                    <Checkbox 
+                    <Checkbox
                       checked={item.selected || false}
                       onCheckedChange={(checked) => onToggleSelect(item.id, checked === true)}
                     />
                   </TableCell>
-                  <TableCell className="font-mono font-medium text-xs sm:text-sm">{item.productNumber}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{item.competitor}</TableCell>
-                  <TableCell>
-                    <span className={`card-category-badge text-xs ${getCategoryClass(item.category)}`}>
-                      {item.category}
+                  <TableCell className="font-medium">{item.manufacturer_part_number}</TableCell>
+                  <TableCell>{item.manufacturer}</TableCell>
+                  <TableCell className="text-center">
+                    <span className={`card-category-badge text-xs ${getCategoryClass(item.component_type)}`}>
+                      {item.component_type}
                     </span>
                   </TableCell>
-                  <TableCell className="font-mono text-xs sm:text-sm hidden sm:table-cell">{item.alternative}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-1">
-                      <Button variant="ghost" size="icon" className="text-primary hover:text-red-700 h-6 w-6 sm:h-8 sm:w-8">
-                        <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-primary hover:text-red-700 h-6 w-6 sm:h-8 sm:w-8">
-                        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </Button>
-                    </div>
+                  <TableCell className="text-center">
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <div className="flex justify-center"> {/* Center the icon */}
+                          <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-red-700" />
+                        </div>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="min-w-96 p-4 rounded-md shadow-md border border-gray-200 bg-white"> {/* Improved styling */}
+                        <div className="grid grid-cols-1 gap-2"> {/* Use a grid for better layout */}
+                          {item.key_electrical_specs && Object.entries(item.key_electrical_specs).map(([key, value]) => {
+                            const newKey = key.replace(/_/g, " ");
+                            return (
+                              <div key={key} className="space-y-1 text-left flex gap-2 items-center">
+                                <p className="text-sm font-semibold text-gray-700 text-nowrap">{newKey}:</p>
+                                <p className="text-sm text-gray-600">{value}</p>
+                              </div>
+                            )
+                          })}
+                          {!item.key_electrical_specs && (
+                            <p className="text-sm text-gray-500">No electrical specifications available.</p>
+                          )}
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </TableCell>
+                  <TableCell className="font-medium">{item.wuerth_manufacturer_part_number.length > 0 ? item.wuerth_manufacturer_part_number : "No matched!"}</TableCell>
+                  <TableCell className="text-xs">{item.wuerth_manufacturer_part_number.length > 0 ? item.reason_why_it_is_a_match : "-"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -167,35 +189,52 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
               <div className="p-3 sm:p-5">
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-mono text-sm sm:text-lg font-bold text-gray-900">{item.productNumber}</div>
-                    <div className="text-xs sm:text-sm text-gray-600 mt-1">{item.competitor}</div>
+                    <div className="font-mono text-sm sm:text-lg font-bold text-gray-900">{item.manufacturer_part_number}</div>
+                    <div className="text-xs sm:text-sm text-gray-600 mt-1">{item.manufacturer}</div>
                   </div>
-                  <Checkbox 
+                  <Checkbox
                     checked={item.selected || false}
                     onCheckedChange={(checked) => onToggleSelect(item.id, checked === true)}
                   />
                 </div>
-                
+
                 <div className="mt-3 sm:mt-4">
-                  <span className={`card-category-badge text-xs ${getCategoryClass(item.category)}`}>
-                    {item.category}
+                  <span className={`card-category-badge text-xs ${getCategoryClass(item.component_type)}`}>
+                    {item.component_type}
                   </span>
                 </div>
-                
+
                 <div className="mt-3 pt-3 sm:mt-4 sm:pt-4 border-t border-gray-200">
                   <h4 className="text-xs sm:text-sm font-medium text-gray-700">Alternative Product:</h4>
-                  <p className="mt-1 text-xs sm:text-sm font-mono text-primary">{item.alternative}</p>
+                  <p className="mt-1 text-xs sm:text-sm font-mono text-primary">{item.wuerth_manufacturer_part_number}</p>
+                  <h4 className="text-xs sm:text-sm font-medium text-gray-700">Reason:</h4>
+                  <p className="mt-1 text-xs ont-mono text-black">{item.reason_why_it_is_a_match}</p>
                 </div>
-                
+
                 <div className="mt-3 sm:mt-4 flex justify-end space-x-2">
-                  <Button variant="outline" size="sm" className="text-xs sm:text-sm py-1 h-7 sm:h-9">
-                    <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    Details
-                  </Button>
-                  <Button size="sm" className="bg-primary hover:bg-red-700 text-xs sm:text-sm py-1 h-7 sm:h-9">
-                    <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    Add
-                  </Button>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <div className="flex justify-center"> {/* Center the icon */}
+                        <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-red-700" />
+                      </div>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="min-w-96 p-4 rounded-md shadow-md border border-gray-200 bg-white"> {/* Improved styling */}
+                      <div className="grid grid-cols-1 gap-2"> {/* Use a grid for better layout */}
+                        {item.key_electrical_specs && Object.entries(item.key_electrical_specs).map(([key, value]) => {
+                          const newKey = key.replace(/_/g, " ");
+                          return (
+                            <div key={key} className="space-y-1 text-left flex gap-2 items-center">
+                              <p className="text-sm font-semibold text-gray-700 text-nowrap">{newKey}:</p>
+                              <p className="text-sm text-gray-600">{value}</p>
+                            </div>
+                          )
+                        })}
+                        {!item.key_electrical_specs && (
+                          <p className="text-sm text-gray-500">No electrical specifications available.</p>
+                        )}
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
               </div>
             </div>
@@ -221,7 +260,7 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                 <span className="sr-only">Previous</span>
                 <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
-              
+
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                 // Show first page, last page, current page, and pages around current
                 let pageNum;
@@ -238,10 +277,10 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                   if (i === 0) pageNum = 1;
                   if (i === 4) pageNum = totalPages;
                 }
-                
+
                 // Add ellipsis effect
-                if ((totalPages > 5 && i === 1 && pageNum > 2) || 
-                    (totalPages > 5 && i === 3 && pageNum < totalPages - 1)) {
+                if ((totalPages > 5 && i === 1 && pageNum > 2) ||
+                  (totalPages > 5 && i === 3 && pageNum < totalPages - 1)) {
                   return (
                     <Button
                       key={`ellipsis-${i}`}
@@ -254,7 +293,7 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                     </Button>
                   );
                 }
-                
+
                 return (
                   <Button
                     key={pageNum}
@@ -267,7 +306,7 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                   </Button>
                 );
               })}
-              
+
               <Button
                 variant="outline"
                 size="sm"
