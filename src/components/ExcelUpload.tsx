@@ -65,33 +65,97 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
     }
   };
 
-  const handleUpload = () => {
+  // const handleUpload = () => {
+  //   if (uploadedFiles.length === 0) return;
+
+  //   setIsUploading(true);
+
+  //   // Simulate API call to /api/upload-bom
+  //   console.log('Uploading files to /api/upload-bom:', uploadedFiles);
+
+  //   // Simulate API response with mock data after a delay
+  //   setTimeout(() => {
+  //     // Generate mock Excel data rows
+  //     const mockData: ExcelRowData[] = [];
+  //     for (let i = 0; i < 15; i++) {
+  //       mockData.push({
+  //         id: `row-${i}`,
+  //         partNumber: `P${Math.floor(Math.random() * 1000000)}`,
+  //         description: `Electronic Component ${i}`,
+  //         quantity: Math.floor(Math.random() * 100) + 1,
+  //         manufacturer: ['Murata', 'TDK', 'Vishay', 'Kemet'][Math.floor(Math.random() * 4)],
+  //         selected: false
+  //       });
+  //     }
+
+  //     setUploadedData(mockData);
+  //     setIsUploading(false);
+  //     setUploadComplete(true);
+  //   }, 1500);
+  // };
+
+  const handleTest = async () => {
+    try {
+      const response = await fetch('http://172.203.218.183:8080/email_ingestion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // Crucial header
+        },
+        body: JSON.stringify({
+          fromDate: "10/31/2024"
+        }),
+      });
+      console.log("response: ", response)
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Upload failed:', errorData);
+        // Handle error (e.g., display an error message to the user)
+        return;
+      }
+
+      const responseData = await response.json();
+      console.log('Upload successful:', responseData);
+    } catch (error) {
+      console.error('Error during upload:', error);
+    }
+  }
+
+  const handleUpload = async () => {
     if (uploadedFiles.length === 0) return;
 
     setIsUploading(true);
 
-    // Simulate API call to /api/upload-bom
-    console.log('Uploading files to /api/upload-bom:', uploadedFiles);
+    const formData = new FormData();
+    uploadedFiles.forEach(file => {
+      formData.append('file', file);
+    });
 
-    // Simulate API response with mock data after a delay
-    setTimeout(() => {
-      // Generate mock Excel data rows
-      const mockData: ExcelRowData[] = [];
-      for (let i = 0; i < 15; i++) {
-        mockData.push({
-          id: `row-${i}`,
-          partNumber: `P${Math.floor(Math.random() * 1000000)}`,
-          description: `Electronic Component ${i}`,
-          quantity: Math.floor(Math.random() * 100) + 1,
-          manufacturer: ['Murata', 'TDK', 'Vishay', 'Kemet'][Math.floor(Math.random() * 4)],
-          selected: false
-        });
+    try {
+      console.log(formData)
+      const response = await fetch('http://127.0.0.1:5000/api/upload-bom', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Upload failed:', errorData);
+        // Handle error (e.g., display an error message to the user)
+        setIsUploading(false);
+        return;
       }
 
-      setUploadedData(mockData);
+      const responseData = await response.json();
+      console.log('Upload successful:', responseData);
+      setUploadedData(responseData.data); // Assuming your Flask response has a 'data' field
       setIsUploading(false);
       setUploadComplete(true);
-    }, 1500);
+
+    } catch (error) {
+      console.error('Error during upload:', error);
+      setIsUploading(false);
+      // Handle network error
+    }
   };
 
   const handleToggleSelect = (id: string, selected: boolean) => {
@@ -174,6 +238,12 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
             )}
 
             <div className="mt-6 flex justify-center">
+              <Button
+                onClick={handleTest}
+                className="bg-primary hover:bg-red-700"
+              >
+                TEST BUTTON
+              </Button>
               <Button
                 onClick={handleUpload}
                 disabled={uploadedFiles.length === 0 || isUploading}
