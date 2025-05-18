@@ -54,7 +54,7 @@ const Home: React.FC = () => {
         // Call the specific API endpoint for Excel search
         const response = await apiRequest(
           'POST',
-          'http://172.203.218.183:8080/api/recommend_candidates',
+          '/api/recommend_candidates',
           searchData.selectedItems
         );
         return response.json();

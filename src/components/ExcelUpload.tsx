@@ -86,7 +86,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onSearch }) => {
     });
 
     try {
-      const response = await fetch('http://172.203.218.183:8080/api/upload-bom', {
+      const response = await fetch('/api/upload-bom', {
         method: 'POST',
         body: formData,
       });
